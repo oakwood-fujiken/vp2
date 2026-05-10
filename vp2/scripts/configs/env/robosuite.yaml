@@ -4,7 +4,7 @@ camera_names: ${camera_names}
 planning_modalities: ${planning_modalities}
 randomize_lighting: False
 randomize_color: False
-renderer: igibson
+renderer: mujoco  # 'igibson' requires the s-tian fork chain, no longer supported
 renderer_camera_height: 256
 renderer_camera_width: 256
 camera_height: ${camera_height}

@@ -6,9 +6,33 @@ This code accompanies the paper [A Control-Centric Benchmark for Video Predictio
  
 ## Installation
 
-This repository comes with an `environment.yml` file for creating a conda environment with required dependencies. 
+VP<sup>2</sup> is a regular pip-installable Python package targeting **Python 3.10+**.
 
-After cloning this repository to your machine and installing conda, use `conda env create -f environment.yml` to generate a conda environment called `vp2`.
+```
+pip install git+https://github.com/s-tian/vp2.git
+```
+
+or, after cloning,
+
+```
+pip install .
+```
+
+This pulls in the official PyPI releases of `robosuite`, `robomimic`, `gymnasium`, `dm_control`, `mujoco` etc. as well as `robodesk` from its upstream GitHub repository — no manual installation of pinned forks is required. The fork-only extensions used by VP<sup>2</sup> (custom domain randomization, depth/segmentation handling, and the `get_object_positions` helper) are reimplemented inside the package itself, in `vp2/envs/_robosuite_compat.py`.
+
+Optional video-prediction model integrations can be installed via extras, e.g.:
+
+```
+pip install "vp2[fitvid] @ git+https://github.com/s-tian/vp2.git"
+```
+
+Available extras: `svg_prime`, `fitvid`, `mcvd`, `struct_vrnn`, `dev`.
+
+> **Note:** The legacy `renderer="igibson"` path is not available without the
+> patched iGibson + robomimic forks. VP<sup>2</sup> now defaults to robosuite's
+> built-in MuJoCo renderer; pass `env.renderer=mujoco` (the default).
+> A `conda` environment file (`environment.yml`) is still provided for users
+> who want to reproduce the original Python 3.7 setup.
 
 You will also need to download the data containing task instance specifications (initial states and goals) as
 well as the classifier weights for the robodesk environment. Pretrained models for
