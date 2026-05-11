@@ -3,10 +3,13 @@ from PIL import Image
 
 from hydra.utils import to_absolute_path
 
-import gym.spaces as spaces
+import gymnasium.spaces as spaces
 from dm_control import mujoco
 from vp2.envs.base import BaseEnv
-from robodesk import RoboDesk
+try:
+    from robodesk import RoboDesk
+except ImportError:
+    from robodesk.robodesk import RoboDesk
 
 ALL_STATE_KEYS = [
     "qpos_robot",

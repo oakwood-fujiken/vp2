@@ -2,14 +2,14 @@ import json
 import os
 
 import numpy as np
-import gym.spaces as spaces
+import gymnasium.spaces as spaces
 
 from hydra.utils import to_absolute_path
 
 import robomimic.utils.file_utils as FileUtils
-import robomimic.utils.env_utils as EnvUtils
 
 from vp2.envs.base import BaseEnv
+from vp2.envs._robosuite_compat import create_env_for_data_processing
 from vp2.mpc.utils import resize_np_image_aa
 
 
@@ -42,19 +42,19 @@ class RobosuiteEnv(BaseEnv):
             len(kwargs["camera_names"]) == 1
         ), "Currently only one camera is supported!"
 
-        self.env = EnvUtils.create_env_for_data_processing(
+        self.env = create_env_for_data_processing(
             env_meta=env_meta,
             camera_names=list(kwargs["camera_names"]),
             camera_depths=camera_depths,
             camera_normals=camera_normals,
-            camera_segmentations=[0],
+            camera_segmentations=[None],
             camera_height=kwargs["renderer_camera_height"],
             camera_width=kwargs["renderer_camera_width"],
             reward_shaping=kwargs["shaped"],
             randomize_lighting=kwargs["randomize_lighting"],
             randomize_color=kwargs["randomize_color"],
             randomize_freq=0,
-            renderer=kwargs["renderer"],
+            renderer=kwargs.get("renderer", "mujoco"),
         )
         print("==== Using environment with the following metadata ====")
         print(json.dumps(self.env.serialize(), indent=4))
@@ -78,10 +78,16 @@ class RobosuiteEnv(BaseEnv):
         return self.env.reset()
 
     def reset_to(self, state):
-        return self.env.reset_to(state, reset_from_xml=self.env_hparams["reset_xml"])
+        # robomimic's public `EnvBase.reset_to` resets from XML iff the state
+        # dict contains a "model" key.  The s-tian fork instead exposed an
+        # explicit `reset_from_xml` flag; we emulate that here.
+        if not self.env_hparams.get("reset_xml", True):
+            state = {k: v for k, v in state.items() if k != "model"}
+        return self.env.reset_to(state)
 
     def reset_state(self, state):
-        return self.env.reset_to(state, reset_from_xml=False)
+        state = {k: v for k, v in state.items() if k != "model"}
+        return self.env.reset_to(state)
 
     def get_image_obs(self, obs):
         return {k: obs[v] for k, v in self.keys_to_take.items()}
@@ -98,10 +104,12 @@ class RobosuiteEnv(BaseEnv):
         return self.env.get_state()["states"]
 
     def compute_score(self, state, goal_state):
+        from vp2.envs._robosuite_compat import get_object_positions
+
         self.env.reset_to({"states": state})
-        obj_positions = self.env.env.get_object_positions()
+        obj_positions = get_object_positions(self.env.env)
         self.env.reset_to({"states": goal_state})
-        goal_positions = self.env.env.get_object_positions()
+        goal_positions = get_object_positions(self.env.env)
         differences = list()
         for c, g in zip(obj_positions, goal_positions):
             differences.append(np.linalg.norm(c - g))

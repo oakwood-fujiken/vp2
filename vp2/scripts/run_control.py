@@ -107,7 +107,7 @@ def get_already_completed_runs(folder_name):
     return num_trajectories_completed
 
 
-@hydra.main(config_path="configs", config_name="config")
+@hydra.main(config_path="configs", config_name="config", version_base="1.1")
 def run_control(cfg):
     set_all_seeds(cfg.seed)
     with open_dict(cfg):

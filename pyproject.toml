@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vp2"
+version = "0.2.0"
+description = "VP2: A Control-Centric Benchmark for Video Prediction"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Stephen Tian" }]
+keywords = [
+    "video prediction",
+    "model predictive control",
+    "robotics",
+    "benchmark",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+    "numpy>=1.23,<2.0",
+    "torch>=1.13",
+    "torchvision>=0.14",
+    "h5py>=3.7",
+    "Pillow>=9.1",
+    "opencv-python>=4.5",
+    "hydra-core>=1.3",
+    "moviepy>=1.0,<2.0",
+    "scikit-image>=0.19",
+    "scikit-learn>=1.1",
+    "lpips>=0.1.4",
+    "piq>=0.7",
+    "imageio>=2.27",
+    "imageio-ffmpeg>=0.4",
+    "gymnasium>=0.28",
+    "dm_control>=1.0.10",
+    "mujoco>=2.3.3",
+    "stable-baselines3>=2.0",
+    "robosuite>=1.4.1",
+    "robomimic>=0.3.0",
+    "robodesk @ git+https://github.com/google-research/robodesk.git@a8edde34f879242730c026dfe7c6e3beb4318023",
+]
+
+[project.optional-dependencies]
+# These pretrained video prediction models are external repositories. They are
+# optional because users typically only need a subset of them.
+svg_prime = ["svg-prime @ git+https://github.com/s-tian/svg-prime.git"]
+fitvid = ["fitvid @ git+https://github.com/s-tian/fitvid.git"]
+mcvd = ["mcvd-pytorch @ git+https://github.com/s-tian/mcvd-pytorch.git"]
+struct_vrnn = [
+    "struct-vrnn-pytorch @ git+https://github.com/s-tian/struct-vrnn-pytorch.git",
+]
+dev = ["ipdb", "pytest"]
+
+[project.urls]
+Homepage = "https://s-tian.github.io/projects/vp2/"
+Paper = "https://arxiv.org/abs/2304.13723"
+Repository = "https://github.com/s-tian/vp2"
+
+[project.scripts]
+vp2-run-control = "vp2.scripts.run_control:run_control"
+
+[tool.setuptools.packages.find]
+include = ["vp2*"]
+
+[tool.setuptools.package-data]
+vp2 = [
+    "envs/*.hdf5",
+    "scripts/configs/*.yaml",
+    "scripts/configs/**/*.yaml",
+]
